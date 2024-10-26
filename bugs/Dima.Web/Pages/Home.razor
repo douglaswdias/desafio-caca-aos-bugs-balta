@@ -21,7 +21,9 @@
                 @if (Summary is null)
                 {
                     <div class="d-flex justify-center align-center" style="height: 350px">
-                        <MudProgressCircular Indeterminate="true" Color="Color.Primary"/>
+                        <MudText Color="Color.Secondary">
+                            @(ShowValues ? "Não há saldo nos últimos 30 dias" : "R$ ********")
+                        </MudText>
                     </div>
                 }
                 else
