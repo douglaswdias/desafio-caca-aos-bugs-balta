@@ -40,6 +40,11 @@ public partial record Email : ValueObject
         return new Email(address, address.ToBase64(), verificationCode);
     }
 
+    public static Email FromString(string address, IDateTimeProvider dateTimeProvider)
+    {
+        return  Email.ShouldCreate(address, dateTimeProvider);
+    }
+
     #endregion
 
     #region Properties
