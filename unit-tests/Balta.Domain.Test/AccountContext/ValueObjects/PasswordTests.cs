@@ -1,27 +1,72 @@
+using Balta.Domain.AccountContext.ValueObjects;
+using Balta.Domain.AccountContext.ValueObjects.Exceptions;
+using Balta.Domain.SharedContext.Extensions;
+using Bogus;
+using FluentAssertions;
+
 namespace Balta.Domain.Test.AccountContext.ValueObjects;
 
 public class PasswordTests
 {
-    [Fact]
-    public void ShouldFailIfPasswordIsNull() => Assert.Fail();
+    private readonly Faker _faker = new Faker();
     
     [Fact]
-    public void ShouldFailIfPasswordIsEmpty() => Assert.Fail();
-    
+    public void ShouldFailIfPasswordIsNull()
+    {
+        Action password = () => Password.ShouldCreate(null);
+        
+        password.Should().Throw<InvalidPasswordException>();
+    }
+
     [Fact]
-    public void ShouldFailIfPasswordIsWhiteSpace() => Assert.Fail();
-    
+    public void ShouldFailIfPasswordIsEmpty()
+    {
+        Action password = () => Password.ShouldCreate("");
+        
+        password.Should().Throw<InvalidPasswordException>();
+    }
+
     [Fact]
-    public void ShouldFailIfPasswordLenIsLessThanMinimumChars() => Assert.Fail();
-    
+    public void ShouldFailIfPasswordIsWhiteSpace()
+    {
+        Action password = () => Password.ShouldCreate(" ");
+        
+        password.Should().Throw<InvalidPasswordException>();
+    }
+
     [Fact]
-    public void ShouldFailIfPasswordLenIsGreaterThanMaxChars() => Assert.Fail();
-    
+    public void ShouldFailIfPasswordLenIsLessThanMinimumChars()
+    {
+        var shortPassword = _faker.Internet.Password(_faker.Random.Int(1, 7));
+        Action password = () => Password.ShouldCreate(shortPassword);
+
+        password.Should().Throw<InvalidPasswordException>();
+    }
+
     [Fact]
-    public void ShouldHashPassword() => Assert.Fail();
-    
+    public void ShouldFailIfPasswordLenIsGreaterThanMaxChars()
+    {
+        var largePassword = _faker.Internet.Password(_faker.Random.Int(33, 64));
+        Action password = () => Password.ShouldCreate(largePassword);
+
+        password.Should().Throw<InvalidPasswordException>();
+    }
+
     [Fact]
-    public void ShouldVerifyPasswordHash() => Assert.Fail();
+    public void ShouldHashPassword()
+    {
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(8, 32));
+        
+        var password = Password.ShouldCreate(validPassword);
+        
+        password.Hash.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void ShouldVerifyPasswordHash()
+    {
+        
+    }
     
     [Fact]
     public void ShouldGenerateStrongPassword() => Assert.Fail();
