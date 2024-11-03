@@ -9,6 +9,8 @@ namespace Balta.Domain.Test.AccountContext.ValueObjects;
 public class PasswordTests
 {
     private readonly Faker _faker = new Faker();
+    private const int MinLength = 8;
+    private const int MaxLength = 48;
     
     [Fact]
     public void ShouldFailIfPasswordIsNull()
@@ -46,7 +48,7 @@ public class PasswordTests
     [Fact]
     public void ShouldFailIfPasswordLenIsGreaterThanMaxChars()
     {
-        var largePassword = _faker.Internet.Password(_faker.Random.Int(33, 64));
+        var largePassword = _faker.Internet.Password(_faker.Random.Int(MaxLength, 64));
         Action password = () => Password.ShouldCreate(largePassword);
 
         password.Should().Throw<InvalidPasswordException>();
@@ -55,7 +57,7 @@ public class PasswordTests
     [Fact]
     public void ShouldHashPassword()
     {
-        var validPassword = _faker.Internet.Password(_faker.Random.Int(8, 32));
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(MinLength, MaxLength));
         
         var password = Password.ShouldCreate(validPassword);
         
@@ -65,27 +67,60 @@ public class PasswordTests
     [Fact]
     public void ShouldVerifyPasswordHash()
     {
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(MinLength, MaxLength));
         
+        var password = Password.ShouldCreate(validPassword);
+        var matchPasswordHash = Password.ShouldMatch(password.Hash, validPassword, 32, 10000, '.');
+        matchPasswordHash.Should().BeTrue();
     }
-    
+
     [Fact]
-    public void ShouldGenerateStrongPassword() => Assert.Fail();
-    
+    public void ShouldGenerateStrongPassword()
+    {
+        var password = Password.ShouldGenerate();
+
+        password.Should().NotBeNull();
+    }
+
     [Fact]
-    public void ShouldImplicitConvertToString() => Assert.Fail();
-    
+    public void ShouldImplicitConvertToString()
+    {
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(MinLength, MaxLength));
+        validPassword.Should().Be(validPassword.ToString());
+    }
+
     [Fact]
-    public void ShouldReturnHashAsStringWhenCallToStringMethod() => Assert.Fail();
-    
+    public void ShouldReturnHashAsStringWhenCallToStringMethod()
+    {
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(MinLength, MaxLength));
+        var password = Password.ShouldCreate(validPassword);
+        
+        password.Hash.Should().Be(password.ToString());
+    }
+
     [Fact]
-    public void ShouldMarkPasswordAsExpired() => Assert.Fail();
-    
+    public void ShouldMarkPasswordAsExpired()
+    {
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(MinLength, MaxLength));
+        var password = Password.ShouldCreate(validPassword);
+        password.MarkAsExpired();
+        
+        password.Expired.Should().BeTrue();
+    }
+
     [Fact]
     public void ShouldFailIfPasswordIsExpired() => Assert.Fail();
-    
+
     [Fact]
-    public void ShouldMarkPasswordAsMustChange() => Assert.Fail();
-    
+    public void ShouldMarkPasswordAsMustChange()
+    {
+        var validPassword = _faker.Internet.Password(_faker.Random.Int(MinLength, MaxLength));
+        var password = Password.ShouldCreate(validPassword);
+        password.MarkAsMustChange();
+        
+        password.MustChange.Should().BeTrue();
+    }
+
     [Fact]
     public void ShouldFailIfPasswordIsMarkedAsMustChange() => Assert.Fail();
 }

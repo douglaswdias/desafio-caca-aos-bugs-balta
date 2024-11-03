@@ -22,6 +22,7 @@ public record Password : ValueObject
         Hash = hash;
         ExpiresAtUtc = null;
         MustChange = false;
+        Expired = false;
     }
 
     #endregion
@@ -53,11 +54,17 @@ public record Password : ValueObject
 
     public string Hash { get; }
     public DateTime? ExpiresAtUtc { get; }
-    public bool MustChange { get; }
+    
+    public bool Expired { get; private set; }
+    public bool MustChange { get; private set; }
 
     #endregion
 
     #region Public Methods
+
+    public void MarkAsExpired() => Expired = true;
+    
+    public void MarkAsMustChange() => MustChange = true;
 
     public static string ShouldGenerate(
         short length = 16,
